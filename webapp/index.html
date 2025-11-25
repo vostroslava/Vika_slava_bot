@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Казино "Рандеву"</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="casino-bg">
+        <div class="neon-signs">
+            <h1 class="neon-title">КАЗИНО "РАНДЕВУ"</h1>
+            <p class="subtitle">Спинни колесо и выиграй незабываемое свидание</p>
+        </div>
+
+        <div class="container">
+            <!-- Колесо рулетки -->
+            <div class="wheel-container">
+                <div class="wheel-pointer">▼</div>
+                <canvas id="wheelCanvas" width="350" height="350"></canvas>
+                <button class="spin-btn" id="spinBtn">
+                    <span class="btn-text">КРУТИТЬ</span>
+                    <span class="btn-subtext">КОЛЕСО</span>
+                </button>
+            </div>
+
+            <!-- Отображение результата -->
+            <div class="result-container" id="resultContainer">
+                <div class="result-card">
+                    <div class="result-icon">🎉</div>
+                    <h2>Поздравляю!</h2>
+                    <p class="prize-text" id="prizeText"></p>
+                    <p class="prize-description">Этот приз гарантирован и обязателен к исполнению!</p>
+                    <button class="claim-btn" id="claimBtn">Забрать приз! 💝</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Финальное сообщение после получения приза -->
+        <div class="final-message" id="finalMessage">
+            <div class="final-content">
+                <h2>✨ Приз забран! ✨</h2>
+                <p>Я уже с нетерпением жду этого момента...</p>
+                <p class="final-note">Напиши мне, когда будешь готова! 😊</p>
+                <button class="close-btn" id="closeBtn">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
