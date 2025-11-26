@@ -1,167 +1,152 @@
-// Призы для колеса
-const prizes = [
-    { text: "🎬 Кино/мультики", emoji: "🎬", category: "Развлечения" },
-    { text: "⛸️ Поход на каток", emoji: "⛸️", category: "Развлечения" },
-    { text: "🎲 Настольные игры", emoji: "🎲", category: "Развлечения" },
-    { text: "🌃 Вечерняя прогулка", emoji: "🌃", category: "Развлечения" },
-    { text: "☕ Кофе + десерт", emoji: "☕", category: "Гастрономия" },
-    { text: "🍳 Слава готовит ужин", emoji: "🍳", category: "Гастрономия" },
-    { text: "🎁 Сюрприз от Славы", emoji: "🎁", category: "Сюрприз" },
-    { text: "💝 Подарок-мелочь", emoji: "💝", category: "Сюрприз" },
-    { text: "💆 Массаж спины 15 мин", emoji: "💆", category: "Милота" },
-    { text: "👜 Слава носит сумку", emoji: "👜", category: "Милота" },
-    { text: "🎥 Выбор фильма", emoji: "🎥", category: "Милота" },
-    { text: "🤗 Обнимашки 24/7", emoji: "🤗", category: "Милота" }
-];
+// State
+let currentQuestionIndex = 0;
+let answers = {}; // {questionId: score}
+const totalQuestions = TEST_DATA.questions.length;
 
-// Цвета для секторов (чередование)
-const colors = ['#DC143C', '#8B0000', '#B22222', '#A52A2A'];
+// Telegram WebApp
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-// Элементы
-const canvas = document.getElementById('wheelCanvas');
-const ctx = canvas.getContext('2d');
-const spinBtn = document.getElementById('spinBtn');
-const resultContainer = document.getElementById('resultContainer');
-const prizeText = document.getElementById('prizeText');
-const claimBtn = document.getElementById('claimBtn');
-const finalMessage = document.getElementById('finalMessage');
-const closeBtn = document.getElementById('closeBtn');
+// Elements
+const welcomeScreen = document.getElementById('welcomeScreen');
+const quizScreen = document.getElementById('quizScreen');
+const resultScreen = document.getElementById('resultScreen');
 
-// Параметры колеса
-const centerX = canvas.width / 2;
-const centerY = canvas.height / 2;
-const radius = 160;
-let currentRotation = 0;
-let isSpinning = false;
+const progressBar = document.getElementById('progressBar');
+const currentQuestionNum = document.getElementById('currentQuestionNum');
+const totalQuestionsEl = document.getElementById('totalQuestions');
+const questionText = document.getElementById('questionText');
+const resultsList = document.getElementById('resultsList');
 
-// Рисуем колесо
-function drawWheel() {
-    const numPrizes = prizes.length;
-    const anglePerSlice = (2 * Math.PI) / numPrizes;
+// Initialize
+totalQuestionsEl.textContent = totalQuestions;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    for (let i = 0; i < numPrizes; i++) {
-        const startAngle = currentRotation + i * anglePerSlice;
-        const endAngle = startAngle + anglePerSlice;
-
-        // Рисуем сектор
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-        ctx.closePath();
-        ctx.fillStyle = colors[i % colors.length];
-        ctx.fill();
-
-        // Граница сектора (золотая)
-        ctx.strokeStyle = '#FFD700';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Текст (emoji)
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(startAngle + anglePerSlice / 2);
-        ctx.textAlign = 'center';
-        ctx.font = '28px Arial';
-        ctx.fillText(prizes[i].emoji, radius * 0.7, 10);
-        ctx.restore();
-    }
-
-    // Центральный круг (декоративный)
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, 45, 0, 2 * Math.PI);
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fill();
-    ctx.strokeStyle = '#FFD700';
-    ctx.lineWidth = 4;
-    ctx.stroke();
+function startTest() {
+    welcomeScreen.classList.remove('active');
+    quizScreen.classList.add('active');
+    renderQuestion();
 }
 
-// Крутим колесо
-function spinWheel() {
-    if (isSpinning) return;
+function renderQuestion() {
+    const question = TEST_DATA.questions[currentQuestionIndex];
 
-    isSpinning = true;
-    spinBtn.classList.add('spinning');
+    // Update UI
+    currentQuestionNum.textContent = currentQuestionIndex + 1;
+    questionText.textContent = question.text;
 
-    // Случайный приз
-    const randomPrizeIndex = Math.floor(Math.random() * prizes.length);
-    const anglePerSlice = (2 * Math.PI) / prizes.length;
+    // Progress bar
+    const progress = ((currentQuestionIndex) / totalQuestions) * 100;
+    progressBar.style.width = `${progress}%`;
+}
 
-    // Целевой угол (останавливается на призе)
-    const targetAngle = randomPrizeIndex * anglePerSlice + anglePerSlice / 2;
+function selectOption(value) {
+    const question = TEST_DATA.questions[currentQuestionIndex];
+    answers[question.id] = value;
 
-    // Количество оборотов + целевой угол
-    const spins = 5 + Math.random() * 3; // 5-8 оборотов
-    const totalRotation = spins * 2 * Math.PI + (2 * Math.PI - targetAngle);
+    // Next question or finish
+    if (currentQuestionIndex < totalQuestions - 1) {
+        currentQuestionIndex++;
 
-    let startTime = null;
-    const duration = 4000; // 4 секунды
+        // Small animation for transition
+        questionText.style.opacity = 0;
+        setTimeout(() => {
+            renderQuestion();
+            questionText.style.opacity = 1;
+        }, 200);
+    } else {
+        finishTest();
+    }
+}
 
-    function animate(currentTime) {
-        if (!startTime) startTime = currentTime;
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
+function finishTest() {
+    quizScreen.classList.remove('active');
+    resultScreen.classList.add('active');
 
-        // Easing (замедление к концу)
-        const easeOut = 1 - Math.pow(1 - progress, 3);
+    const results = calculateResults();
+    renderResults(results);
 
-        currentRotation = easeOut * totalRotation;
-        drawWheel();
+    // Send data to Telegram
+    if (tg) {
+        tg.sendData(JSON.stringify(results));
+    }
+}
 
-        if (progress < 1) {
-            requestAnimationFrame(animate);
-        } else {
-            // Остановка
-            isSpinning = false;
-            spinBtn.classList.remove('spinning');
-            showPrize(randomPrizeIndex);
+function calculateResults() {
+    const scaleScores = {};
+    const scaleCounts = {};
+
+    // Initialize
+    for (const key in TEST_DATA.scales) {
+        scaleScores[key] = 0;
+        scaleCounts[key] = 0;
+    }
+
+    // Calculate
+    TEST_DATA.questions.forEach(q => {
+        const rawScore = answers[q.id];
+        let finalScore = rawScore;
+
+        if (q.reverse) {
+            finalScore = 6 - rawScore;
         }
+
+        scaleScores[q.scale] += finalScore;
+        scaleCounts[q.scale]++;
+    });
+
+    // Average
+    const finalResults = {};
+    for (const key in TEST_DATA.scales) {
+        const avg = scaleScores[key] / scaleCounts[key];
+        let level = 'mid';
+        if (avg <= 2.4) level = 'low';
+        else if (avg >= 3.5) level = 'high';
+
+        finalResults[key] = {
+            name: TEST_DATA.scales[key].name,
+            score: avg.toFixed(1),
+            level: level,
+            description: TEST_DATA.scales[key].description
+        };
     }
 
-    requestAnimationFrame(animate);
+    return finalResults;
 }
 
-// Показать приз
-function showPrize(index) {
-    const prize = prizes[index];
-    prizeText.innerHTML = `<strong>${prize.text}</strong><br><small>(${prize.category})</small>`;
+function renderResults(results) {
+    resultsList.innerHTML = '';
 
-    setTimeout(() => {
-        resultContainer.classList.add('show');
-    }, 500);
-}
+    for (const key in results) {
+        const res = results[key];
+        const percent = (res.score / 5) * 100;
 
-// Забрать приз
-claimBtn.addEventListener('click', () => {
-    resultContainer.classList.remove('show');
-    setTimeout(() => {
-        finalMessage.classList.add('show');
-    }, 300);
-});
+        let levelText = '';
+        if (res.level === 'low') levelText = 'Низкий';
+        if (res.level === 'mid') levelText = 'Средний';
+        if (res.level === 'high') levelText = 'Высокий';
 
-// Закрыть финальное сообщение
-closeBtn.addEventListener('click', () => {
-    finalMessage.classList.remove('show');
+        const html = `
+            <div class="result-item">
+                <div class="res-top">
+                    <span class="res-name">${res.name}</span>
+                    <span class="res-score">${res.score} / 5</span>
+                </div>
+                <div class="res-bar-bg">
+                    <div class="res-bar-fill" style="width: ${percent}%"></div>
+                </div>
+                <div class="res-desc">
+                    Уровень: <strong>${levelText}</strong><br>
+                    ${res.description}
+                </div>
+            </div>
+        `;
 
-    // Отправка в Telegram (если запущено в WebApp)
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.sendData(JSON.stringify({
-            action: 'prize_claimed',
-            prize: prizeText.textContent
-        }));
+        resultsList.innerHTML += html;
     }
-});
+}
 
-// Обработчик кнопки
-spinBtn.addEventListener('click', spinWheel);
-
-// Инициализация
-drawWheel();
-
-// Telegram WebApp integration
-if (window.Telegram && window.Telegram.WebApp) {
-    window.Telegram.WebApp.ready();
-    window.Telegram.WebApp.expand();
+function closeApp() {
+    if (tg) {
+        tg.close();
+    }
 }

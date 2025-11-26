@@ -3,52 +3,83 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Казино "Рандеву"</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sexuality Profile</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <div class="casino-bg">
-        <div class="neon-signs">
-            <h1 class="neon-title">КАЗИНО "РАНДЕВУ"</h1>
-            <p class="subtitle">Спинни колесо и выиграй незабываемое свидание</p>
-        </div>
-
-        <div class="container">
-            <!-- Колесо рулетки -->
-            <div class="wheel-container">
-                <div class="wheel-pointer">▼</div>
-                <canvas id="wheelCanvas" width="350" height="350"></canvas>
-                <button class="spin-btn" id="spinBtn">
-                    <span class="btn-text">КРУТИТЬ</span>
-                    <span class="btn-subtext">КОЛЕСО</span>
-                </button>
-            </div>
-
-            <!-- Отображение результата -->
-            <div class="result-container" id="resultContainer">
-                <div class="result-card">
-                    <div class="result-icon">🎉</div>
-                    <h2>Поздравляю!</h2>
-                    <p class="prize-text" id="prizeText"></p>
-                    <p class="prize-description">Этот приз гарантирован и обязателен к исполнению!</p>
-                    <button class="claim-btn" id="claimBtn">Забрать приз! 💝</button>
+    <div class="app-container">
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen" class="screen active">
+            <div class="glass-card hero-card">
+                <div class="icon-wrapper">
+                    <span class="hero-icon">❤️‍🔥</span>
+                </div>
+                <h1>Сексуальный Профиль</h1>
+                <p class="subtitle">Научный подход к пониманию твоей чувственности</p>
+                <div class="info-badges">
+                    <span class="badge">⏱ 5 минут</span>
+                    <span class="badge">🧠 Big Five Model</span>
                 </div>
             </div>
+            <button class="btn-primary" onclick="startTest()">Начать анализ</button>
         </div>
 
-        <!-- Финальное сообщение после получения приза -->
-        <div class="final-message" id="finalMessage">
-            <div class="final-content">
-                <h2>✨ Приз забран! ✨</h2>
-                <p>Я уже с нетерпением жду этого момента...</p>
-                <p class="final-note">Напиши мне, когда будешь готова! 😊</p>
-                <button class="close-btn" id="closeBtn">Закрыть</button>
+        <!-- Quiz Screen -->
+        <div id="quizScreen" class="screen">
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
             </div>
+            <div class="question-counter">Вопрос <span id="currentQuestionNum">1</span> из <span
+                    id="totalQuestions">24</span></div>
+
+            <div class="glass-card question-card">
+                <h2 id="questionText">Загрузка...</h2>
+            </div>
+
+            <div class="options-container">
+                <button class="option-btn" onclick="selectOption(1)">
+                    <span class="opt-val">1</span>
+                    <span class="opt-label">Совсем не согласен</span>
+                </button>
+                <button class="option-btn" onclick="selectOption(2)">
+                    <span class="opt-val">2</span>
+                    <span class="opt-label">Скорее нет</span>
+                </button>
+                <button class="option-btn" onclick="selectOption(3)">
+                    <span class="opt-val">3</span>
+                    <span class="opt-label">И да, и нет</span>
+                </button>
+                <button class="option-btn" onclick="selectOption(4)">
+                    <span class="opt-val">4</span>
+                    <span class="opt-label">Скорее да</span>
+                </button>
+                <button class="option-btn" onclick="selectOption(5)">
+                    <span class="opt-val">5</span>
+                    <span class="opt-label">Полностью согласен</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="resultScreen" class="screen">
+            <div class="glass-card result-header">
+                <h2>Твой Профиль</h2>
+                <p class="result-subtitle">Анализ завершен</p>
+            </div>
+
+            <div id="resultsList" class="results-list">
+                <!-- Results will be injected here -->
+            </div>
+
+            <button class="btn-primary" onclick="closeApp()">Готово</button>
         </div>
     </div>
 
+    <script src="questions.js"></script>
     <script src="script.js"></script>
 </body>
 
